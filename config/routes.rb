@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :notifications
+  resources :announcements
   resources :cards
   resources :lists
   devise_for :users
