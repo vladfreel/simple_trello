@@ -1,9 +1,32 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
-  resources :notifications
-  resources :announcements
-  resources :cards
-  resources :lists
-  devise_for :users
-  root 'home#index'
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  namespace :admin do
+    resources :users
+    resources :announcements
+    resources :notifications
+
+    root to: "users#index"
+  end
+  
+  resources :notifications, only: [:index]
+  resources :announcements, only: [:index]
+  authenticate :user, lambda { |u| u.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
+
+  devise_for :users, controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
+
+  resources :lists do
+    member do
+      patch :move
+    end
+  end
+  resources :cards do
+    member do
+      patch :move
+    end
+  end
+
+  root to: 'lists#index'
 end
