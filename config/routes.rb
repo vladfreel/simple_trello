@@ -8,7 +8,7 @@ Rails.application.routes.draw do
 
     root to: "users#index"
   end
-  
+
   resources :notifications, only: [:index]
   resources :announcements, only: [:index]
   authenticate :user, lambda { |u| u.admin? } do
