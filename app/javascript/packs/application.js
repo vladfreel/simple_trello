@@ -12,6 +12,7 @@ import App from '../app.vue'
 
 document.addEventListener('turbolinks:load', function () {
     var element = document.querySelector('#boards')
+    console.log(App);
     if(element !== undefined)
     {
         const app = new Vue({
@@ -19,7 +20,7 @@ document.addEventListener('turbolinks:load', function () {
             data: {
                 lists: JSON.parse(element.dataset.lists)
             },
-            template: "<App :original_list = 'lists'/>",
+            template: "<App :original_lists='lists'/>",
             components: { App }
         })
     }

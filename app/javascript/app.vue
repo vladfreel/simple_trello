@@ -1,13 +1,14 @@
 <template>
   <div id="app">
-    <p>{{ message }}</p>
+    <div v-for="list in original_lists">
+    {{ list.name }}
+    </div>
   </div>
 </template>
 
 <script>
 export default {
     props: ["original_lists"],
-
 }
 </script>
 
