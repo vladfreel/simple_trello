@@ -35,7 +35,7 @@ gem 'pg', '~> 0.18.4'
 # gem 'capistrano-rails', group: :development
 gem 'devise'
 gem 'bootstrap', '~> 4.1.3'
-gem 'jquery-rails'
+gem 'jquery-rails', '~> 4.3.1'
 gem 'acts_as_list'
 gem 'devise_masquerade'
 gem 'sidekiq', '~> 5.0'
