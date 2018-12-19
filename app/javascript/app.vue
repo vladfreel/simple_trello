@@ -1,7 +1,13 @@
 <template>
-  <div id="app">
-    <div v-for="list in original_lists">
-    {{ list.name }}
+  <div id="app" class= "row">
+    <div v-for="list in original_lists" class = "col-3">
+    <h6>{{ list.name }}</h6>
+    <hr />
+    <div v-for="(card, index) in list.cards" class="card card-body mb-3">
+        {{ card.name }}
+    </div>
+    <textarea class="form-control"></textarea>
+    <button class="btn btn-primary">Add</button>
     </div>
   </div>
 </template>

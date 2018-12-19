@@ -12,7 +12,6 @@ import App from '../app.vue'
 
 document.addEventListener('turbolinks:load', function () {
     var element = document.querySelector('#boards')
-    console.log(App);
     if(element !== undefined)
     {
         const app = new Vue({
