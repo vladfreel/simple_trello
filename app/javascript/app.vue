@@ -1,106 +1,100 @@
 <template>
-    <draggable v-model="lists" :options="{group: 'lists'}" class="board dragArea" @end = "listMoved">
-        <div v-for="(list, index) in lists" class = "list">
-            <h6>{{ list.name }}</h6>
-            <hr />
-            <draggable v-model="list.cards" :options="{group: 'cards'}" class="dragArea" @change = "cardMoved">
-                <div v-for="(card, index) in list.cards" class="card card-body mb-3">
-                    {{ card.name }}
-                </div>
-            </draggable>
-                <div class="card card-body">
-                    <textarea class="form-control" v-model="messages[list.id]"></textarea>
-                    <button v-on:click="submitMessages(list.id)" class="btn btn-secondary">Add</button>
-                </div>
-
-        </div>
+  <div class="board">
+    <draggable v-model="lists" :options="{group: 'lists'}" class="dragArea d-inline-block" @end="listMoved">
+      <list v-for="(list, index) in lists" :list="list"></list>
     </draggable>
+
+    <div class="list">
+      <a v-if="!editing" v-on:click="startEditing">Add a List</a>
+      <textarea v-if="editing" ref="message" v-model="message" class="form-control mb-1"></textarea>
+      <button v-if="editing" v-on:click="createList" class="btn btn-secondary">Add</button>
+      <a v-if="editing" v-on:click="editing=false">Cancel</a>
+    </div>
+  </div>
 </template>
 
 <script>
-import Rails from 'rails-ujs'
-Rails.start()
-import draggable from 'vuedraggable'
 
+import draggable from 'vuedraggable'
+import list from 'components/list'
 
 export default {
-    components: { draggable },
-    props: ["original_lists"],
-    data: function(){
-        return {
-            messages: {},
-            lists: this.original_lists,
-        }
-    },
-    methods:{
-        cardMoved: function(event){
-            const evt = event.added || event.moved
-            if(evt == undefined){return}
-            const element = evt.element
-            const list_index = this.lists.findIndex((list) =>{
-                return list.cards.find((card) =>{
-                    return card.id === element.id
-                })
-            })
-            var data = new FormData
-            data.append("card[list_id]", this.lists[list_index].id)
-            data.append("card[position]", evt.newIndex + 1)
+  components: { draggable, list },
 
-            Rails.ajax({
-                url: `/cards/${element.id}/move`,
-                type: "PATCH",
-                data: data,
-                dataType: "json"
-            })
-        },
-        listMoved: function(event){
-            var data = new FormData
-            data.append("list[position]", event.newIndex + 1)
-            Rails.ajax({
-                url: `/lists/${this.lists[event.newIndex].id}/move`,
-                type: "PATCH",
-                data: data,
-                dataType: "json"
-            })
-
-        },
-        submitMessages: function(list_id){
-            this.messages[list_id]
-            var data = new FormData
-            data.append("card[list_id]", list_id)
-            data.append("card[name]", this.messages[list_id])
-            console.log('afsafas');
-            Rails.ajax({
-                url: "/cards",
-                type: "POST",
-                data: data,
-                dataType: "json",
-                success: (data) => {
-                    const index = this.lists.findIndex(item => item.id == list_id)
-                    this.lists[index].cards.push(data)
-                    this.messages[list_id] = undefined
-                }
-            });
-        }
+  data: function() {
+    return {
+      editing: false,
+      message: "",
     }
+  },
+
+  computed: {
+    lists: {
+      get() {
+        return this.$store.state.lists
+      },
+      set(value) {
+        this.$store.state.lists = value
+      },
+    },
+  },
+
+  methods: {
+    startEditing: function() {
+      this.editing = true
+      this.$nextTick(() => { this.$refs.message.focus() })
+    },
+
+    listMoved: function(event) {
+      var data = new FormData
+      data.append("list[position]", event.newIndex + 1)
+
+      Rails.ajax({
+        beforeSend: () => true,
+        url: `/lists/${this.lists[event.newIndex].id}/move`,
+        type: "PATCH",
+        data: data,
+        dataType: "json",
+      })
+    },
+
+    createList: function() {
+      var data = new FormData
+      data.append("list[name]", this.message)
+
+      Rails.ajax({
+        beforeSend: () => true,
+        url: "/lists",
+        type: "POST",
+        data: data,
+        dataType: "json",
+        success: (data) => {
+          this.message = ""
+          this.editing = false
+        }
+      })
+    }
+  }
 }
 </script>
 
 <style scoped>
 .dragArea {
-    min-height: 10px;
+  min-height: 10px;
 }
-.board{
-    background: #E2E4E6;
-    border-radius: 3px;
-    white-space: nowrap;
-    overflow-x: auto;
+
+.board {
+  overflow-x: auto;
+  white-space: nowrap;
 }
-.list{
-    display: inline-block;
-    vertical-align: top;
-    margin-right: 20px;
-    padding: 20px;
-    width: 270px;
+
+.list {
+  background: #E2E4E6;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 20px;
+  padding: 10px;
+  vertical-align: top;
+  width: 270px;
 }
 </style>
